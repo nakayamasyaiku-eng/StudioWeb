@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sakura's Dream Studio</title>
+
+<style>
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", Arial, sans-serif;
+    background: #050a14; /* 确保背景色第一时间显示 */
+    color: white;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  /* 背景光影 */
+  .bg {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at 20% 20%, #0a2540, transparent 45%),
+                radial-gradient(circle at 80% 30%, #172a3a, transparent 40%),
+                radial-gradient(circle at 50% 80%, #1e3c5a, transparent 50%);
+    filter: blur(60px);
+    transform: scale(1.2);
+    z-index: 1;
+  }
+
+  .scene {
+    position: relative;
+    z-index: 2;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .panel {
+    display: flex;
+    width: 860px;
+    height: 480px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+  }
+
+  /* 左侧边栏 */
+  .sidebar {
+    width: 280px;
+    padding: 40px 30px;
+    background: rgba(0, 0, 0, 0.3);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .title { font-size: 24px; font-weight: 600; margin-bottom: 5px; }
+  .subtitle { font-size: 11px; opacity: 0.5; letter-spacing: 1px; margin-bottom: 40px; }
+
+  .choices { display: flex; flex-direction: column; gap: 15px; }
+
+  button {
+    text-align: left;
+    padding: 12px 16px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid transparent;
+    color: rgba(255,255,255,0.6);
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  button:hover, button.active {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    transform: translateX(5px);
+  }
+
+  button .en { display: block; font-size: 13px; font-weight: 600; }
+  button .zh { display: block; font-size: 11px; opacity: 0.7; }
+
+  /* 右侧内容 */
+  .content-area {
+    flex: 1;
+    padding: 50px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .story {
+    font-size: 16px;
+    line-height: 1.8;
+    color: rgba(255,255,255,0.9);
+    white-space: pre-line; /* 保持换行 */
+  }
+
+  .highlight { color: #a4c8e1; font-weight: bold; }
+</style>
+</head>
+
+<body>
+<div class="bg"></div>
+
+<div class="scene">
+  <div class="panel">
+    <div class="sidebar">
+      <div class="title">Sakura's Dream</div>
+      <div class="subtitle">STUDIO SYSTEM v2.0</div>
+      <div class="choices">
+        <button id="btn-about" onclick="route('about')">
+          <span class="en">About Us</span>
+          <span class="zh">关于我们</span>
+        </button>
+        <button id="btn-products" onclick="route('products')">
+          <span class="en">Products</span>
+          <span class="zh">主要产品</span>
+        </button>
+        <button id="btn-merch" onclick="route('merch')">
+          <span class="en">Merchandise</span>
+          <span class="zh">游戏周边</span>
+        </button>
+        <button id="btn-contact" onclick="route('contact')">
+          <span class="en">Contact</span>
+          <span class="zh">商务合作</span>
+        </button>
+      </div>
+    </div>
+    <div class="content-area">
+      <div id="story" class="story">正在初始化系统... / Initializing...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const storyEl = document.getElementById("story");
+  const nodes = {
+    home: "系统已就绪。\nWelcome to Sakura's Dream Studio.\n\n“让每个人能沉浸在未有的生活中”\nBe Another One, to be yourself.",
+    about: "<span class='highlight'>[ 关于我们 ]</span>\n\n我们致力于创造沉浸式的叙事体验。\n在这里，你不仅是用户，更是梦境的参与者。",
+    products: "<span class='highlight'>[ 主要产品 ]</span>\n\n- 核心交互系统 (开发中)\n- 沉浸式叙事框架\n\n更多精彩内容即将解锁。",
+    merch: "<span class='highlight'>[ 游戏周边 ]</span>\n\n连接虚拟与现实的桥梁。\n我们的周边产品正在设计阶段。",
+    contact: "<span class='highlight'>[ 商务合作 ]</span>\n\n联系人: Sakura\n邮箱: Sakura956904363@outlook.com"
+  };
+
+  let isTyping = false;
+
+  function typeText(text) {
+    if (isTyping) return;
+    isTyping = true;
+    storyEl.innerHTML = "";
+    let i = 0;
+    
+    function step() {
+      if (i < text.length) {
+        // 简单处理HTML标签
+        if (text.slice(i, i+1) === '<') {
+            let tagEnd = text.indexOf('>', i);
+            storyEl.innerHTML += text.slice(i, tagEnd + 1);
+            i = tagEnd + 1;
+        } else {
+            storyEl.innerHTML += text[i] === "\n" ? "<br/>" : text[i];
+            i++;
+        }
+        setTimeout(step, 20);
+      } else {
+        isTyping = false;
+      }
+    }
+    step();
+  }
+
+  function route(node) {
+    // 更新按钮状态
+    document.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+    const activeBtn = document.getElementById('btn-' + node);
+    if(activeBtn) activeBtn.classList.add('active');
+    
+    typeText(nodes[node]);
+  }
+
+  // 关键：确保页面加载完成后再显示初始内容
+  window.onload = () => {
+    route('home');
+  };
+</script>
+</body>
+</html>
